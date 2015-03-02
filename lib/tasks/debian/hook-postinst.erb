@@ -1,0 +1,17 @@
+#!/bin/sh
+case "$1" in
+  downloaded)
+    sv -w 20 force-stop <%= app_name %> || echo "Error while trying to stop the service"
+  ;;
+
+  configured)
+    sv start <%= app_name %> || echo "Error while trying to start the service"
+  ;;
+
+  *)
+    echo "Warning: postinst part called with invalid argument" >&2
+    sv start <%= app_name %> || echo "Error while trying to start the service"
+  ;;
+esac
+
+exit 0

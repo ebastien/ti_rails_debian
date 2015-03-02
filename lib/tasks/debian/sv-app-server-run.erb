@@ -1,0 +1,7 @@
+#!/bin/sh
+exec 2>&1
+mkdir -p <%= app_run_path %>
+chown <%= app_user %> <%= app_run_path %>
+chmod 755 <%= app_run_path %>
+cd <%= app_lib_path %>
+exec chpst -u<%= app_user %> ./bin/puma -C <%= File.join app_etc_path, "puma.rb" %>

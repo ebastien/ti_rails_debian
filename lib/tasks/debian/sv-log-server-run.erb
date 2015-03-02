@@ -1,0 +1,5 @@
+#!/bin/sh
+mkdir -p <%= app_log_path %>/puma
+chown <%= app_user %> <%= app_log_path %>/puma
+chmod 755 <%= app_log_path %>/puma
+exec chpst -u<%= app_user %> svlogd -tt <%= app_log_path %>/puma
