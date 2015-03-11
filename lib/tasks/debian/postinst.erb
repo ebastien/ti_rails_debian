@@ -17,7 +17,7 @@ set -e
 case "$1" in
   configure)
     cd <%= app_lib_path %>
-    su <%= app_user %> -c "RAILS_ENV=production ./bin/rake debian:configure"
+    su <%= app_user %> -c "RAILS_ENV=production ./bin/rake ti_rails_debian:configure"
     sv start <%= app_name %> || \
       echo "Error while trying to start the service"
   ;;

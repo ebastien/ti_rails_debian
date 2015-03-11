@@ -19,7 +19,7 @@ case "$1" in
       echo "Error while trying to stop the service"
     rm -f /etc/service/<%= app_name %>
     cd <%= app_lib_path %>
-    su <%= app_user %> -c "RAILS_ENV=production ./bin/rake debian:deconfigure"
+    su <%= app_user %> -c "RAILS_ENV=production ./bin/rake ti_rails_debian:deconfigure"
   ;;
 
   upgrade)
