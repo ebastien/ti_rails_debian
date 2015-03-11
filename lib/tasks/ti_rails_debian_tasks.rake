@@ -64,7 +64,8 @@ app_sv_path = File.join sv_path, app_name
 
 config_files = [
   "database.yml", "thin.yml", "puma.rb",
-  "newrelic.yml", ".secret_token", "application.yml"
+  "newrelic.yml", ".secret_token", "application.yml",
+  "secrets.yml"
 ]
 
 directories = [
