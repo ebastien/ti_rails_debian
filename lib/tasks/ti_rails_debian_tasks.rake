@@ -71,7 +71,7 @@ config_files = [
 
 directories = [
   app_lib_path, app_log_path, app_run_path,
-  app_etc_path, app_sv_path
+  app_etc_path, app_sv_path, app_resque_sv_path
 ]
 
 templates = [
