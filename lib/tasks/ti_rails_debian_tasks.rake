@@ -61,6 +61,7 @@ app_log_path = File.join log_path, app_name
 app_run_path = File.join run_path, app_name
 app_etc_path = File.join etc_path, app_name
 app_sv_path = File.join sv_path, app_name
+app_resque_sv_path = File.join sv_path, "#{app_name}-resque"
 
 config_files = [
   "database.yml", "thin.yml", "puma.rb",
@@ -77,7 +78,8 @@ templates = [
   ['postinst.erb', 'postinst'],
   ['prerm.erb', 'prerm'],
   ['sv-app-server-run.erb', File.join(app_sv_path, "run")],
-  ['sv-log-server-run.erb', File.join(app_sv_path, "log", "run")]
+  ['sv-log-server-run.erb', File.join(app_sv_path, "log", "run")],
+  ['sv-resque-workers-run.erb', File.join(app_resque_sv_path, "run")]
 ]
 
 app_hooks.each do |hook|
