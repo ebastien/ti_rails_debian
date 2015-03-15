@@ -15,8 +15,10 @@ set -e
 
 case "$1" in
   remove|deconfigure)
-    sv stop <%= app_name %> || \
-      echo "Error while trying to stop the service"
+    sv stop <%= app_resque_service %> || \
+      echo "Error while trying to stop the workers service"
+    sv stop <%= app_service %> || \
+      echo "Error while trying to stop the application service"
     rm -f /etc/service/<%= app_name %>
     cd <%= app_lib_path %>
     su <%= app_user %> -c "RAILS_ENV=production ./bin/rake ti_rails_debian:deconfigure"

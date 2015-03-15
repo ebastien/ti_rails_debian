@@ -56,12 +56,15 @@ run_path = "/var/run/rails"
 etc_path = "/etc/rails"
 sv_path = "/etc/sv"
 
+app_service = app_name
+app_resque_service = "#{app_name}-resque"
+
 app_lib_path = File.join lib_path, app_name
 app_log_path = File.join log_path, app_name
 app_run_path = File.join run_path, app_name
 app_etc_path = File.join etc_path, app_name
-app_sv_path = File.join sv_path, app_name
-app_resque_sv_path = File.join sv_path, "#{app_name}-resque"
+app_sv_path = File.join sv_path, app_service
+app_resque_sv_path = File.join sv_path, app_resque_service
 
 config_files = [
   "database.yml", "thin.yml", "puma.rb",

@@ -18,8 +18,10 @@ case "$1" in
   configure)
     cd <%= app_lib_path %>
     su <%= app_user %> -c "RAILS_ENV=production ./bin/rake ti_rails_debian:configure"
-    sv start <%= app_name %> || \
-      echo "Error while trying to start the service"
+    sv start <%= app_service %> || \
+      echo "Error while trying to start the application service"
+    sv start <%= app_resque_service %> || \
+      echo "Error while trying to start the workers service"
   ;;
 
   abort-upgrade|abort-remove|abort-deconfigure)
