@@ -25,6 +25,8 @@ case "$1" in
   ;;
 
   upgrade)
+    sv stop <%= app_resque_service %> || \
+      echo "Error while trying to stop the workers service"
     sv stop <%= app_name %> || \
       echo "Error while trying to stop the service"
   ;;
