@@ -21,7 +21,11 @@ case "$1" in
       echo "Error while trying to stop the application service"
     rm -f /etc/service/<%= app_resque_service %> /etc/service/<%= app_service %>
     cd <%= app_lib_path %>
-    su <%= app_user %> -c "RAILS_ENV=production ./bin/rake ti_rails_debian:deconfigure"
+    su <%= app_user %> -c "RAILS_ENV=production ./bin/rake ti_rails_debian:deconfigure" || true
+    <% config_files.each do |cfg| %>
+    rm -f '<%= File.join(app_lib_path, "config", cfg) %>'<% end %>
+    rm -f '<%= File.join(app_lib_path, "log") %>'
+    rm -f '<%= File.join(app_lib_path, "tmp") %>'
   ;;
 
   upgrade)

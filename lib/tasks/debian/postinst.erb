@@ -16,8 +16,17 @@ set -e
 
 case "$1" in
   configure)
+    <% config_files.each do |cfg| %>
+    ln -sf '<%= File.join(app_etc_path, cfg) %>' '<%= File.join(app_lib_path, "config", cfg) %>'<% end %>
+    if [ ! -d <%= File.join(app_lib_path, "log") %> ]; then
+      ln -sf '<%= app_log_path %>' '<%= File.join(app_lib_path, "log") %>'
+    fi
+    if [ ! -d <%= File.join(app_lib_path, "tmp") %> ]; then
+      ln -sf '<%= app_run_path %>' '<%= File.join(app_lib_path, "tmp") %>'
+    fi
+
     cd <%= app_lib_path %>
-    su <%= app_user %> -c "RAILS_ENV=production ./bin/rake ti_rails_debian:configure"
+    su <%= app_user %> -c "RAILS_ENV=production ./bin/rake ti_rails_debian:configure" || true
     sv start <%= app_service %> || \
       echo "Error while trying to start the application service"
     sv start <%= app_resque_service %> || \

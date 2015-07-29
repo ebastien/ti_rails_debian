@@ -236,13 +236,6 @@ namespace :ti_rails_debian do
 
     check_production!
 
-    config_files.each do |cfg|
-      ensure_link File.join(app_etc_path, cfg), \
-                  File.join(app_path, "config", cfg)
-    end
-    ensure_link app_log_path, File.join(app_path, "log")
-    ensure_link app_run_path, File.join(app_path, "tmp")
-
     if Rake::Task.task_defined?("db:migrate")
       Rake::Task["db:migrate"].invoke
     end
@@ -252,11 +245,5 @@ namespace :ti_rails_debian do
   task :deconfigure do
 
     check_production!
-
-    config_files.each do |cfg|
-      rm_f File.join(app_path, "config", cfg)
-    end
-    rm_f File.join(app_path, "log")
-    rm_f File.join(app_path, "tmp")
   end
 end
