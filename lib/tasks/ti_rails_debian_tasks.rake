@@ -29,6 +29,7 @@ app_arch = config['arch'] || 'all'
 app_description = config['description'] || 'A Rails application.'
 app_dependencies = config['dependencies'] || []
 app_hooks = config['hooks'] || []
+app_config_files = config['config_files'] || []
 
 resources = [
   '.bundle/', '.bundle/config',
@@ -66,7 +67,7 @@ app_etc_path = File.join etc_path, app_name
 app_sv_path = File.join sv_path, app_service
 app_resque_sv_path = File.join sv_path, app_resque_service
 
-config_files = [
+config_files = app_config_files | [
   "database.yml", "thin.yml", "puma.rb",
   "newrelic.yml", ".secret_token", "application.yml",
   "secrets.yml", "resque.yml"
