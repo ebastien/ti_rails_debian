@@ -98,16 +98,27 @@ app_hooks.each do |hook|
 end
 
 build_path = File.join app_path, 'tmp/build'
+cache_path = File.join app_path, 'vendor/cache'
 
 package_name = "#{app_name}_#{app_version}-#{app_iteration}_#{app_arch}.deb"
 package_path = File.join build_path, package_name
 
 directory build_path
+directory cache_path
 
 namespace :ti_rails_debian do
  
+  desc "Cache gems for packaging in #{cache_path}."
+  task :bundle_cache => cache_path do
+    Dir.chdir(app_path) do
+      Bundler.with_clean_env do
+        system("bundle package")
+      end
+    end
+  end
+
   desc "Build the distribution files of #{app_name}."
-  task :distribution => build_path do
+  task :distribution => [build_path, 'ti_rails_debian:bundle_cache'] do
   
     if Rake::Task.task_defined?("assets:precompile")
       Rake::Task["assets:precompile"].invoke
@@ -185,10 +196,7 @@ namespace :ti_rails_debian do
   desc "Package the application as #{package_name}."
   task :package => 'ti_rails_debian:dependencies' do
 
-    fpm_bin = File.join app_path, "bin/fpm"
-    unless File.executable?(fpm_bin)
-      raise "Failed to locate the FPM binary"
-    end
+    fpm_bin = "bundle exec fpm"
     
     # Compute relative paths without trailing './'
     root_pathname = Pathname.new('/')
