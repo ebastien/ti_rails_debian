@@ -121,7 +121,11 @@ namespace :ti_rails_debian do
   task :distribution => [build_path, 'ti_rails_debian:bundle_cache'] do
   
     if Rake::Task.task_defined?("assets:precompile")
-      Rake::Task["assets:precompile"].invoke
+      Dir.chdir(app_path) do
+        Bundler.with_clean_env do
+          system("RAILS_ENV=production bundle exec rake assets:precompile")
+        end
+      end
     end
 
     directories.each do |d|
