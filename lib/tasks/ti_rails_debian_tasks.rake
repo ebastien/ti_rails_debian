@@ -41,7 +41,7 @@ resources = [
   'Gemfile',
   'Gemfile.lock',
   'lib/', 'lib/**/*',
-  'public/', 'public/**/*',
+  'public/', 'public/**/*', 'public/assets/.sprockets-manifest-*.json',
   'Rakefile',
   'release.yml',
   'script/', 'script/rails',
