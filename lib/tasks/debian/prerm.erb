@@ -15,13 +15,19 @@ set -e
 
 case "$1" in
   remove|deconfigure)
-    sv stop <%= app_resque_service %> || \
+    <% if @with_resque %>
+    <%= cmd_service_stop(app_resque_service) %> || \
       echo "Error while trying to stop the workers service"
-    sv stop <%= app_service %> || \
+    <%= cmd_service_disable(app_resque_service) %> || \
+      echo "Error while trying to disable the workers service"
+    <% end %>
+    <%= cmd_service_stop(app_service) %> || \
       echo "Error while trying to stop the application service"
-    rm -f /etc/service/<%= app_resque_service %> /etc/service/<%= app_service %>
+    <%= cmd_service_disable(app_service) %> || \
+      echo "Error while trying to disable the application service"
+
     cd <%= app_lib_path %>
-    su <%= app_user %> -c "RAILS_ENV=production ./bin/rake ti_rails_debian:deconfigure" || true
+    su -s /bin/bash -c 'RAILS_ENV=production ./bin/rake ti_rails_debian:deconfigure' <%= app_user %> || true
     <% config_files.each do |cfg| %>
     rm -f '<%= File.join(app_lib_path, "config", cfg) %>'<% end %>
     rm -f '<%= File.join(app_lib_path, "log") %>'
@@ -29,10 +35,12 @@ case "$1" in
   ;;
 
   upgrade)
-    sv stop <%= app_resque_service %> || \
+    <% if @with_resque %>
+    <%= cmd_service_stop(app_resque_service) %> || \
       echo "Error while trying to stop the workers service"
-    sv stop <%= app_name %> || \
-      echo "Error while trying to stop the service"
+    <% end %>
+    <%= cmd_service_stop(app_service) %> || \
+      echo "Error while trying to stop the application service"
   ;;
 
   failed-upgrade)

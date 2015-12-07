@@ -1,16 +1,21 @@
 #!/bin/sh
 case "$1" in
   downloaded)
-    sv -w 20 force-stop <%= app_name %> || echo "Error while trying to stop the service"
+    <% if @with_resque %>
+    <%= cmd_service_force_stop(app_resque_service) %> || echo "Error while trying to stop the workers service"
+    <% end %>
+    <%= cmd_service_force_stop(app_service) %> || echo "Error while trying to stop the application service"
   ;;
 
   configured)
-    sv start <%= app_name %> || echo "Error while trying to start the service"
+    <%= cmd_service_start(app_service) %> || echo "Error while trying to start the application service"
+    <% if @with_resque %>
+    <%= cmd_service_start(app_resque_service) %> || echo "Error while trying to start the workers service"
+    <% end %>
   ;;
 
   *)
     echo "Warning: postinst part called with invalid argument" >&2
-    sv start <%= app_name %> || echo "Error while trying to start the service"
   ;;
 esac
 

@@ -30,6 +30,30 @@ app_description = config['description'] || 'A Rails application.'
 app_dependencies = config['dependencies'] || []
 app_hooks = config['hooks'] || []
 app_config_files = config['config_files'] || []
+app_supervisor = config['supervisor'] || 'runit'
+
+@with_resque = File.exists? File.join(app_path, 'config', 'resque.god')
+@with_systemd = app_supervisor == 'systemd'
+
+def cmd_service_disable(service)
+  @with_systemd ? "/bin/systemctl disable #{service}.service"
+                : "/bin/rm -f /etc/service/#{service}"
+end
+
+def cmd_service_start(service)
+  @with_systemd ? "/bin/systemctl start #{service}.service"
+                : "/usr/bin/sv start #{service}"
+end
+
+def cmd_service_stop(service)
+  @with_systemd ? "/bin/systemctl stop #{service}.service"
+                : "/usr/bin/sv stop #{service}"
+end
+
+def cmd_service_force_stop(service)
+  @with_systemd ? "/bin/systemctl stop #{service}.service"
+                : "/usr/bin/sv -w 20 force-stop #{service}"
+end
 
 resources = [
   '.bundle/', '.bundle/config',
@@ -57,13 +81,14 @@ run_path = "/var/run/rails"
 etc_path = "/etc/rails"
 sv_path = "/etc/sv"
 
-app_service = app_name
-app_resque_service = "#{app_name}-resque"
-
 app_lib_path = File.join lib_path, app_name
 app_log_path = File.join log_path, app_name
 app_run_path = File.join run_path, app_name
 app_etc_path = File.join etc_path, app_name
+
+app_service = app_name
+app_resque_service = "#{app_name}-resque"
+
 app_sv_path = File.join sv_path, app_service
 app_resque_sv_path = File.join sv_path, app_resque_service
 
@@ -73,18 +98,38 @@ config_files = app_config_files | [
   "secrets.yml", "resque.yml"
 ]
 
+directories_runit = [app_sv_path] + (@with_resque ? [app_resque_sv_path] : [])
+
 directories = [
-  app_lib_path, app_log_path, app_run_path,
-  app_etc_path, app_sv_path, app_resque_sv_path
+  app_lib_path,
+  app_log_path,
+  app_run_path,
+  app_etc_path
+] + (@with_systemd ? [] : directories_runit)
+
+templates_runit_resque = [
+  ['sv-resque-workers-run.erb', File.join(app_resque_sv_path, "run")]
 ]
+
+templates_runit = [
+  ['sv-app-server-run.erb', File.join(app_sv_path, "run")],
+  ['sv-log-server-run.erb', File.join(app_sv_path, "log", "run")]
+] + (@with_resque ? templates_runit_resque : [])
+
+templates_systemd_resque = [
+  ['systemd-workers-service.erb',
+    File.join(app_lib_path, "#{app_resque_service}.service"), 0644]
+]
+
+templates_systemd = [
+  ['systemd-server-service.erb',
+    File.join(app_lib_path, "#{app_service}.service"), 0644]
+] + (@with_resque ? templates_systemd_resque : [])
 
 templates = [
   ['postinst.erb', 'postinst'],
-  ['prerm.erb', 'prerm'],
-  ['sv-app-server-run.erb', File.join(app_sv_path, "run")],
-  ['sv-log-server-run.erb', File.join(app_sv_path, "log", "run")],
-  ['sv-resque-workers-run.erb', File.join(app_resque_sv_path, "run")]
-]
+  ['prerm.erb', 'prerm']
+] + (@with_systemd ? templates_systemd : templates_runit)
 
 app_hooks.each do |hook|
   parts_path = File.join "/etc", hook
@@ -134,15 +179,15 @@ namespace :ti_rails_debian do
     end
 
     # Realize ERB templates
-    templates.each do |template, dest|
+    templates.each do |template, dest, mode|
       source = File.join plugin_path, 'lib/tasks/debian', template
       target = File.join build_path, dest
       mkdir_p File.dirname target
-      puts "Realize template #{source} to #{target}"
+      puts "Realize template #{source} as #{target}"
       erb = ERB.new(File.read(source))
       erb.filename = File.basename source
       File.open(target, 'w') { |f| f.write erb.result(binding) }
-      chmod 0755, target
+      chmod (mode || 0755), target
     end
   
     app_pathname = Pathname.new app_path
