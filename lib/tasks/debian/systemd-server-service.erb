@@ -6,6 +6,7 @@ Requires=nginx.service
 [Service]
 User=<%= app_user %>
 Group=<%= app_user %>
+EnvironmentFile=/etc/environment
 TimeoutStartSec=0
 WorkingDirectory=<%= app_lib_path %>
 ExecStartPre=/bin/mkdir -p <%= app_run_path %>
