@@ -264,7 +264,7 @@ namespace :ti_rails_debian do
     prerm_script = File.join build_path, 'prerm'
 
     cfg_flags = rel_cfg_files.map { |f| "--config-files #{f}" }.join ' '
-    dep_flags = (app_dependencies+app_hooks).map { |d| "-d \"#{d}\"" }.join ' '
+    dep_flags = app_dependencies.map { |d| "-d \"#{d}\"" }.join ' '
 
     fpm_cmd = "#{fpm_bin} -p #{package_name} -n #{app_name} -v #{app_version}" \
               " --iteration #{app_iteration} -a #{app_arch}" \
