@@ -11,6 +11,16 @@ def ensure_link(target, link)
   ln_sf(target, link) unless File.exists? link
 end
 
+def shellout(cmd, chdir = Rails.root)
+  $stderr.puts "#{chdir}$ #{cmd}"
+  Dir.chdir(chdir) do
+    Bundler.with_clean_env do
+      system cmd
+      fail "Failed to run #{cmd}" unless $?.success?
+    end
+  end
+end
+
 app_path = Rails.root
 plugin_path = File.expand_path('../../..', __FILE__)
 
@@ -155,22 +165,15 @@ namespace :ti_rails_debian do
  
   desc "Cache gems for packaging in #{cache_path}."
   task :bundle_cache => cache_path do
-    Dir.chdir(app_path) do
-      Bundler.with_clean_env do
-        system("bundle package")
-      end
-    end
+    shellout "bundle package"
   end
 
   desc "Build the distribution files of #{app_name}."
   task :distribution => [build_path, 'ti_rails_debian:bundle_cache'] do
   
     if Rake::Task.task_defined?("assets:precompile")
-      Dir.chdir(app_path) do
-        Bundler.with_clean_env do
-          system("RAILS_ENV=production bundle exec rake assets:precompile")
-        end
-      end
+      shellout "bundle exec rake assets:precompile " \
+               "RAILS_ENV=production RAILS_GROUPS=assets"
     end
 
     directories.each do |d|
@@ -183,7 +186,7 @@ namespace :ti_rails_debian do
       source = File.join plugin_path, 'lib/tasks/debian', template
       target = File.join build_path, dest
       mkdir_p File.dirname target
-      puts "Realize template #{source} as #{target}"
+      $stderr.puts "Realize template #{source} as #{target}"
       erb = ERB.new(File.read(source))
       erb.filename = File.basename source
       File.open(target, 'w') { |f| f.write erb.result(binding) }
@@ -234,12 +237,8 @@ namespace :ti_rails_debian do
 
     build_lib_path = File.join build_path, app_lib_path
 
-    Dir.chdir(build_lib_path) do
-      Bundler.with_clean_env do
-        system("bundle install --local --binstubs --path vendor/bundle" \
-               " --without development test assets deployment")
-      end
-    end
+    shellout "bundle install --local --binstubs --path vendor/bundle" \
+             " --without development test assets deployment", build_lib_path
   end
 
   desc "Package the application as #{package_name}."
@@ -279,9 +278,7 @@ namespace :ti_rails_debian do
     
     rm_f package_path
     
-    $stderr.puts fpm_cmd
-
-    Dir.chdir(build_path) { system(fpm_cmd) }
+    shellout fpm_cmd, build_path
 
     manifest_file = File.join build_path, "manifest"
     open(manifest_file, 'w') do |f|
