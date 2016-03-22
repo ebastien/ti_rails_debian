@@ -1,0 +1,21 @@
+[Unit]
+Description=<%= app_description %> [workers]
+After=<%= app_service %>.service
+Requires=<%= app_service %>.service
+
+[Service]
+User=<%= app_user %>
+Group=<%= app_user %>
+EnvironmentFile=/etc/environment
+Restart=on-failure
+TimeoutStartSec=0
+WorkingDirectory=<%= app_lib_path %>
+ExecStartPre=/bin/mkdir -p <%= app_run_path %>
+ExecStartPre=/bin/chown www-data <%= app_run_path %>
+ExecStartPre=/bin/chmod 755 <%= app_run_path %>
+ExecStart=<%= app_lib_path %>/bin/god -D --no-syslog -c <%= app_lib_path %>/config/resque.god
+ExecStop=<%= app_lib_path %>/bin/god stop
+ExecStop=<%= app_lib_path %>/bin/god terminate
+
+[Install]
+WantedBy=multi-user.target
