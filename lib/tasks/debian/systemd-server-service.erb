@@ -4,8 +4,8 @@ After=nginx.service
 Requires=nginx.service
 
 [Service]
-User=<%= app_user %>
-Group=<%= app_user %>
+User=root
+Group=root
 EnvironmentFile=/etc/environment
 Restart=on-failure
 TimeoutStartSec=0
@@ -13,7 +13,7 @@ WorkingDirectory=<%= app_lib_path %>
 ExecStartPre=/bin/mkdir -p <%= app_run_path %>
 ExecStartPre=/bin/chown www-data <%= app_run_path %>
 ExecStartPre=/bin/chmod 755 <%= app_run_path %>
-ExecStart=<%= app_lib_path %>/bin/puma -C <%= File.join app_etc_path, "puma.rb" %>
+ExecStart=/bin/su -c '<%= app_lib_path %>/bin/puma -C <%= File.join app_etc_path, "puma.rb" %>' -s /bin/bash <%= app_user %>
 
 [Install]
 WantedBy=multi-user.target
