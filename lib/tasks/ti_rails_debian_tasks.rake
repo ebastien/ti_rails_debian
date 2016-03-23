@@ -50,6 +50,10 @@ def cmd_service_disable(service)
                 : "/bin/rm -f /etc/service/#{service}"
 end
 
+def cmd_service_setup(service)
+  @with_systemd ? "/bin/systemctl daemon-reload" : "true"
+end
+
 def cmd_service_start(service)
   @with_systemd ? "/bin/systemctl start #{service}.service"
                 : "/usr/bin/sv start #{service}"

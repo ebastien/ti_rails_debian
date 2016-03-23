@@ -28,6 +28,7 @@ case "$1" in
     cd <%= app_lib_path %>
     su -s /bin/bash -c 'RAILS_ENV=production ./bin/rake ti_rails_debian:configure' <%= app_user %> || true
 
+    <%= cmd_service_setup(app_service) %> || echo "Error while reloading service configuration"
     <%= cmd_service_start(app_service) %> || echo "Error while trying to start the application service"
     <% if @with_resque %>
     <%= cmd_service_start(app_resque_service) %> || echo "Error while trying to start the workers service"
