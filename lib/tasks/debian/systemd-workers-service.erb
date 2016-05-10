@@ -6,7 +6,8 @@ Requires=<%= app_service %>.service
 [Service]
 User=root
 Group=root
-EnvironmentFile=/etc/environment
+EnvironmentFile=-/etc/environment
+EnvironmentFile=-<%= app_etc_path %>/environment
 Restart=on-failure
 TimeoutStartSec=0
 WorkingDirectory=<%= app_lib_path %>
