@@ -26,6 +26,7 @@ case "$1" in
     fi
 
     cd <%= app_lib_path %>
+    su -s /bin/bash -c './bin/bundle install' <%= app_user %> || true
     su -s /bin/bash -c 'RAILS_ENV=production ./bin/rake ti_rails_debian:configure' <%= app_user %> || true
 
     <%= cmd_service_setup(app_service) %> || echo "Error while reloading service configuration"
