@@ -278,6 +278,7 @@ namespace :ti_rails_debian do
               " #{cfg_flags}" \
               " --description \"#{app_description}\"" \
               " --exclude \"*/vendor/cache/*\"" \
+              " --exclude config/master.key" \
               " -t deb -s dir #{rel_dirs.join ' '}"
     
     rm_f package_path
